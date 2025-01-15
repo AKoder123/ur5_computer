@@ -1,0 +1,8 @@
+prefix=/home/acrv/HRIGroupAdmin/example_ros_ws/src/pick_demo/build/devel
+
+Name: pick_demo
+Description: Description of pick_demo
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

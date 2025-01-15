@@ -1,0 +1,20 @@
+<launch>
+<arg name="device" default="/dev/ttyUSB0" />
+<arg name="robot_ip" default="10.0.0.1" />
+<arg name="kinematics_config" default="/home/acrv/my_robot_calibration.yaml" />
+  <include file="$(find ur_robot_driver)/launch/ur5_bringup.launch">
+    <arg name="robot_ip" value="$(arg robot_ip)" />
+    <arg name="kinematics_config" value="$(arg kinematics_config)" />
+  </include>
+
+  <include file="$(find ur5_moveit_config)/launch/moveit_planning_execution.launch" />
+  <include file="$(find ur5_moveit_config)/launch/moveit_rviz.launch" />
+
+  <arg name="load_gripper" default="false"/>
+  <include file="$(find pick_demo)/launch/setup_gripper.launch" if="$(arg load_gripper)" >
+    <arg name="device" value="$(arg device)" />
+  </include>
+
+
+
+</launch>

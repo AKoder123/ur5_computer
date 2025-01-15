@@ -1,0 +1,8 @@
+prefix=/usr/local
+
+Name: pick_demo
+Description: Description of pick_demo
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 
