@@ -13,6 +13,8 @@ class DepthReader:
 
         # Publisher for the contact point depth
         self.contact_point_pub = rospy.Publisher("/contact_point", Float32, queue_size=10)
+        self.projection_position_pub = rospy.Publisher("/projection_position", Float32, queue_size=10)
+        self.projection_scale_pub = rospy.Publisher("/projection_scale", Float32, queue_size=10)
 
         # Subscribe to the raw depth image
         self.depth_sub = rospy.Subscriber(
@@ -53,6 +55,9 @@ class DepthReader:
         height, width = self.depth_image.shape[:2]
         center_x = width // 2 + 20
         center_y = height // 2 + 7
+        
+        screen_width = width
+        
 
         # Depth at the green dot (center)
         depth_value = self.depth_image[center_y, center_x]
@@ -72,7 +77,7 @@ class DepthReader:
         overlay_image = self.color_image.copy()
 
         # Draw the green dot at the contact point
-        cv2.circle(overlay_image, (center_x, center_y), 5, (0, 255, 0), -1)
+        cv2.circle(overlay_image, (center_x+10, center_y), 5, (0, 255, 0), -1)
 
         # Define the orange rectangles
         rect1_top_left = (width // 2 - 90, height // 2 + 10)
@@ -81,8 +86,8 @@ class DepthReader:
         rect2_bottom_right = (width // 2 + 200, height // 2 + 90)
 
         # Draw orange rectangles
-        cv2.rectangle(overlay_image, rect1_top_left, rect1_bottom_right, (0, 165, 255), -1)
-        cv2.rectangle(overlay_image, rect2_top_left, rect2_bottom_right, (0, 165, 255), -1)
+        # cv2.rectangle(overlay_image, rect1_top_left, rect1_bottom_right, (0, 165, 255), -1)
+        # cv2.rectangle(overlay_image, rect2_top_left, rect2_bottom_right, (0, 165, 255), -1)
 
         # Calculate centers of the orange rectangles
         rect1_center = (
@@ -109,8 +114,8 @@ class DepthReader:
         scaled_gap = int(original_gap / scale_factor)
 
         # Calculate new centers for the purple rectangles
-        purple_rect1_center_x = center_x - scaled_gap // 2
-        purple_rect2_center_x = center_x + scaled_gap // 2
+        purple_rect1_center_x = center_x - scaled_gap // 2 + 20  
+        purple_rect2_center_x = center_x + scaled_gap // 2+ 15
 
         # Scale the dimensions of the purple rectangles
         def scale_rectangle(top_left, bottom_right, scale_factor):
@@ -123,19 +128,26 @@ class DepthReader:
             return new_top_left, new_bottom_right
 
         rect1_top_left_purple, rect1_bottom_right_purple = scale_rectangle(
-            (purple_rect1_center_x - 20, rect1_center[1] - 40),
-            (purple_rect1_center_x + 20, rect1_center[1] + 40),
+            (purple_rect1_center_x - 20, rect1_center[1] - 40 - 35),
+            (purple_rect1_center_x + 20, rect1_center[1] + 40 - 35),
             scale_factor
         )
         rect2_top_left_purple, rect2_bottom_right_purple = scale_rectangle(
-            (purple_rect2_center_x - 20, rect2_center[1] - 40),
-            (purple_rect2_center_x + 20, rect2_center[1] + 40),
+            (purple_rect2_center_x - 20, rect2_center[1] - 40 - 35),
+            (purple_rect2_center_x + 20, rect2_center[1] + 40 - 35),
             scale_factor
         )
+        
+        pos_value = purple_rect2_center_x / float(screen_width)
+        
+        self.projection_position_pub.publish(pos_value)
+        self.projection_scale_pub.publish(scale_factor)
 
         # Draw purple rectangles
         cv2.rectangle(overlay_image, rect1_top_left_purple, rect1_bottom_right_purple, (255, 0, 255), -1)
         cv2.rectangle(overlay_image, rect2_top_left_purple, rect2_bottom_right_purple, (255, 0, 255), -1)
+        
+        
 
         # Show the final image
         cv2.imshow("Gripper Projection Visualization", overlay_image)
