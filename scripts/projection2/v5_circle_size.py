@@ -76,8 +76,7 @@ class DepthReader:
         # Make a copy of the color image for overlay
         overlay_image = self.color_image.copy()
 
-        # Draw the green dot at the contact point
-        cv2.circle(overlay_image, (center_x+10, center_y), 5, (0, 255, 0), -1)
+        
 
         # Define the orange rectangles
         rect1_top_left = (width // 2 - 90, height // 2 + 10)
@@ -143,10 +142,15 @@ class DepthReader:
         
         self.projection_position_pub.publish(pos_value)
         self.projection_scale_pub.publish(scale_factor)
+        
+        circle_size = 50
+        
+        # Draw the green dot at the contact point
+        cv2.circle(overlay_image, (center_x+10, center_y), int(circle_size/(scale_factor/2)), (0, 255, 0), -1)
 
         # Draw purple rectangles
-        cv2.rectangle(overlay_image, rect1_top_left_purple, rect1_bottom_right_purple, (255, 0, 255), -1)
-        cv2.rectangle(overlay_image, rect2_top_left_purple, rect2_bottom_right_purple, (255, 0, 255), -1)
+        # cv2.rectangle(overlay_image, rect1_top_left_purple, rect1_bottom_right_purple, (255, 0, 255), -1)
+        # cv2.rectangle(overlay_image, rect2_top_left_purple, rect2_bottom_right_purple, (255, 0, 255), -1)
         
         
 
